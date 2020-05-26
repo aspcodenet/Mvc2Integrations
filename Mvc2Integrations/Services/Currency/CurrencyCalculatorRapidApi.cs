@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Polly;
 using RestSharp;
 
-namespace Mvc2Integrations.Services
+namespace Mvc2Integrations.Services.Currency
 {
     class CachedCurrencyCalculator : ICurrencyCalculator
     {
@@ -37,17 +37,20 @@ namespace Mvc2Integrations.Services
     class RetryCurrencyCalculator : ICurrencyCalculator
     {
         private readonly ICurrencyCalculator _inner;
-
-        public RetryCurrencyCalculator(ICurrencyCalculator inner)
+        private readonly Settings _settings;
+        public RetryCurrencyCalculator(ICurrencyCalculator inner, IOptions<Settings> settings)
         {
+            _settings = settings.Value;
             _inner = inner;
         }
+
+
         public List<string> GetCurrencies()
         {
             var result = new List<string>();
 
             Polly.Policy.HandleResult<List<string>>(r => r.Count() == 0)
-                .Retry(3, onRetry: (result, i) => System.Threading.Thread.Sleep(i * 10000 + 5000)).Execute(() =>
+                .Retry(_settings.Retries, onRetry: (result, i) => System.Threading.Thread.Sleep(i * 10000 + 5000)).Execute(() =>
                     {
                         result = _inner.GetCurrencies();
                         return result;
@@ -59,7 +62,7 @@ namespace Mvc2Integrations.Services
         {
             var result = 0m;
             Polly.Policy.HandleResult<decimal>(r => r == 0)
-                .Retry(3, onRetry: (result, i) => System.Threading.Thread.Sleep(i * 10000 + 5000)).Execute(() =>
+                .Retry(_settings.Retries, onRetry: (result, i) => System.Threading.Thread.Sleep(i * 10000 + 5000)).Execute(() =>
                 {
                     result = _inner.ConvertCurrency(from, to, belopp);
                     return result;
@@ -71,6 +74,11 @@ namespace Mvc2Integrations.Services
 
     class CurrencyCalculatorRapidApi : ICurrencyCalculator
     {
+        private readonly Settings _settings;
+        public CurrencyCalculatorRapidApi(IOptions<Settings> settings)
+        {
+            _settings = settings.Value;
+        }
         public List<string> GetCurrencies()
         {
             var list = new List<string>();
@@ -78,8 +86,7 @@ namespace Mvc2Integrations.Services
             var request = new RestRequest("https://currency-exchange.p.rapidapi.com/listquotes",
                 Method.GET, DataFormat.Json);
 
-            request.AddHeader("x-rapidapi-host", "currency-exchange.p.rapidapi.com");
-            request.AddHeader("x-rapidapi-key", "5e6066745bmshaf9bc51c1001802p19cb2bjsn7e247cd625f2");
+            SetApiHeaders(request);
             var response = client.Execute(request);       
 
 
@@ -90,13 +97,19 @@ namespace Mvc2Integrations.Services
             return list;
         }
 
+        private void SetApiHeaders(RestRequest request)
+        {
+            request.AddHeader("x-rapidapi-host", _settings.ApiHost);
+            request.AddHeader("x-rapidapi-key", _settings.ApiKey);
+        }
+
         public decimal ConvertCurrency(string @from, string to, decimal belopp)
         {
             var b = $"{belopp:0.0}".Replace(",", ".");
-        var client = new RestClient($"https://currency-exchange.p.rapidapi.com/exchange?q={b}&from={from}&to={to}");
+            var client = new RestClient($"https://currency-exchange.p.rapidapi.com/exchange?q={b}&from={from}&to={to}");
             var request = new RestRequest(Method.GET);
-            request.AddHeader("x-rapidapi-host", "currency-exchange.p.rapidapi.com");
-            request.AddHeader("x-rapidapi-key", "5e6066745bmshaf9bc51c1001802p19cb2bjsn7e247cd625f2");
+            SetApiHeaders(request);
+
             IRestResponse response = client.Execute(request);
             if (response.StatusCode == HttpStatusCode.OK)
             {

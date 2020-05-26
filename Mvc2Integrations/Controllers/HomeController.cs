@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Mvc2Integrations.Models;
 using Mvc2Integrations.Services;
+using Mvc2Integrations.Services.Currency;
+using Mvc2Integrations.Services.KrisInfo;
 using Mvc2Integrations.ViewModels;
 
 namespace Mvc2Integrations.Controllers
@@ -36,7 +38,8 @@ namespace Mvc2Integrations.Controllers
         public IActionResult Kris()
         {
             var viewModel = new KrisListViewModel();
-            viewModel.Items = _infoService.GetKrisInfo().Select(r=>new KrisListViewModel.Kris {Id = r.Id, Summary = r.Summary, Title = r.Title}).ToList();
+            viewModel.Items = _infoService.GetKrisInfo()
+                .Select(r=>new KrisListViewModel.Kris {Id = r.Id, Summary = r.Summary, Title = r.Title}).ToList();
             return View(viewModel);
         }
 
@@ -44,10 +47,9 @@ namespace Mvc2Integrations.Controllers
         [HttpPost]
         public IActionResult Index(ShowCurrencyConverterViewModel model)
         {
-            //Server side
-            //if (model.FromCurrency == model.ToCurrency)
+            //if ((model.Tal % 2) == 0)
             //{
-            //    ModelState.AddModelError("ToCurrency", "Ange ngt annat, inte samma");
+            //    ModelState.AddModelError("Tal", "Måste vara ijmt");
             //}
 
             if (ModelState.IsValid)

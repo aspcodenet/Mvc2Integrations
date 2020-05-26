@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Mvc2Integrations.Services
+namespace Mvc2Integrations.Services.Currency
 {
     public class CurrencyCalculatorFake : ICurrencyCalculator
     {

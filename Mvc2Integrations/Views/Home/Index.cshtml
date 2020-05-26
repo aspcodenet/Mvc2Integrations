@@ -4,28 +4,38 @@
     ViewData["Title"] = "Home Page";
 }
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Belopp"></label>
-        <input asp-for="Belopp" />
-        <span asp-validation-for="Belopp" class="text-danger"></span>
-    </div>
+    <form method="post">
+        <div class="form-group">
+            <label asp-for="Belopp"></label>
+            <input asp-for="Belopp" />
+            <span asp-validation-for="Belopp" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="FromCurrency"></label>
-        <select class="form-control" asp-for="FromCurrency" asp-items="Model.AllCurrencies">
-        </select>
-        <span asp-validation-for="FromCurrency" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ToCurrency"></label>
-        <select class="form-control" asp-for="ToCurrency" asp-items="Model.AllCurrencies">
-        </select>
-        <span asp-validation-for="ToCurrency" class="text-danger"></span>
-    </div>
-    <hr />
-    <button type="submit" class="btn btn-primary mb-2">Calculate</button>
-</form>
+        <div class="form-group">
+            <label asp-for="FromCurrency"></label>
+            <select class="form-control" asp-for="FromCurrency" asp-items="Model.AllCurrencies">
+            </select>
+            <span asp-validation-for="FromCurrency" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ToCurrency"></label>
+            <select class="form-control" asp-for="ToCurrency" asp-items="Model.AllCurrencies">
+            </select>
+            <span asp-validation-for="ToCurrency" class="text-danger"></span>
+        </div>
+
+
+
+
+        <div class="form-group">
+            <label asp-for="Tal"></label>
+            <input asp-for="Tal" />
+            <span asp-validation-for="Tal" class="text-danger"></span>
+        </div>
+
+        <hr />
+        <button type="submit" class="btn btn-primary mb-2">Calculate</button>
+    </form>
 
 @if (Model.Result > 0)
 {

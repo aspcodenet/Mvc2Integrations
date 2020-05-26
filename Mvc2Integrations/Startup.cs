@@ -5,10 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Mvc2Integrations.Models;
 using Mvc2Integrations.Services;
+using Mvc2Integrations.Services.Currency;
+using Mvc2Integrations.Services.KrisInfo;
 
 namespace Mvc2Integrations
 {
@@ -24,13 +28,20 @@ namespace Mvc2Integrations
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<HockeyDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
             services.AddMemoryCache();
-            services.AddScoped<IInfoService, InfoService>();
+            services.AddTransient<IInfoService, InfoService>();
             services.Decorate<IInfoService, CachedInfoService>();
 
-            services.AddScoped<ICurrencyCalculator, CurrencyCalculatorRapidApi>();
-            services.Decorate<ICurrencyCalculator, RetryCurrencyCalculator>();
-            services.Decorate<ICurrencyCalculator, CachedCurrencyCalculator>();
+            services.Configure<Settings>(Configuration.GetSection("CurrencySettings"));
+            services.Configure<KrisInfoSettings>(Configuration.GetSection("KrisInfoSettings"));
+
+            services.AddTransient<ICurrencyCalculator, CurrencyCalculatorFake>();
+            //services.Decorate<ICurrencyCalculator, RetryCurrencyCalculator>();
+            //services.Decorate<ICurrencyCalculator, CachedCurrencyCalculator>();
             services.AddControllersWithViews();
         }
 

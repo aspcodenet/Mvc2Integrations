@@ -9,6 +9,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Mvc2Integrations.ViewModels
 {
+    public class MustBeUnevenAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object value)
+        {
+            int v = Convert.ToInt32(value);
+            return v % 2 != 0;
+        }
+    }
+
     public class NotSameAttribute : ValidationAttribute, IClientModelValidator
     {
         private readonly string _otherPropertyName;
@@ -57,5 +66,10 @@ namespace Mvc2Integrations.ViewModels
         public int Belopp { get; set; } = 1;
 
         public decimal Result { get; set; } = 0;
+
+
+        [MustBeUneven(ErrorMessage = "Din dumsnut bla bla")]
+        public int Tal { get; set; } = 0;
+
     }
 }
