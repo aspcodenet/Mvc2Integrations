@@ -1,0 +1,13 @@
+﻿@model Mvc2Integrations.ViewModels.KrisListViewModel
+
+
+<h1>Viktig information</h1>
+
+@foreach (var k in Model.Items)
+{
+<div>
+    <b><a href="@k.Id">@k.Title</a></b>
+    <hr />@k.Summary
+<hr />
+</div>
+}

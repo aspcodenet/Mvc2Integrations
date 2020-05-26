@@ -24,7 +24,13 @@ namespace Mvc2Integrations
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<ICurrencyCalculator, CurrencyCalculatorFake>();
+            services.AddMemoryCache();
+            services.AddScoped<IInfoService, InfoService>();
+            services.Decorate<IInfoService, CachedInfoService>();
+
+            services.AddScoped<ICurrencyCalculator, CurrencyCalculatorRapidApi>();
+            services.Decorate<ICurrencyCalculator, RetryCurrencyCalculator>();
+            services.Decorate<ICurrencyCalculator, CachedCurrencyCalculator>();
             services.AddControllersWithViews();
         }
 

@@ -17,11 +17,13 @@ namespace Mvc2Integrations.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ICurrencyCalculator _currentCalculator;
+        private readonly IInfoService _infoService;
 
-        public HomeController(ILogger<HomeController> logger, ICurrencyCalculator currentCalculator)
+        public HomeController(ILogger<HomeController> logger, ICurrencyCalculator currentCalculator, IInfoService infoService)
         {
             _logger = logger;
             _currentCalculator = currentCalculator;
+            _infoService = infoService;
         }
 
         public IActionResult Index()
@@ -31,9 +33,23 @@ namespace Mvc2Integrations.Controllers
             return View(viewModel);
         }
 
+        public IActionResult Kris()
+        {
+            var viewModel = new KrisListViewModel();
+            viewModel.Items = _infoService.GetKrisInfo().Select(r=>new KrisListViewModel.Kris {Id = r.Id, Summary = r.Summary, Title = r.Title}).ToList();
+            return View(viewModel);
+        }
+
+
         [HttpPost]
         public IActionResult Index(ShowCurrencyConverterViewModel model)
         {
+            //Server side
+            //if (model.FromCurrency == model.ToCurrency)
+            //{
+            //    ModelState.AddModelError("ToCurrency", "Ange ngt annat, inte samma");
+            //}
+
             if (ModelState.IsValid)
             {
                 model.Result = _currentCalculator.ConvertCurrency(model.FromCurrency, model.ToCurrency, model.Belopp);
